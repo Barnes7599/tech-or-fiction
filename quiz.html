@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tech Fact or Frightening Fiction?</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* Custom styles for the app */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .font-header {
+            font-family: 'Creepster', cursive;
+            letter-spacing: 2px;
+        }
+        /* Style for the source link tooltip */
+        .source-tooltip {
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .source-container:hover .source-tooltip {
+            visibility: visible;
+            opacity: 1;
+        }
+        /* Add a simple fade-in for questions */
+        .question-card {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-black text-white min-h-screen flex items-center justify-center p-4">
+
+    <div id="quiz-container" class="w-full max-w-2xl mx-auto">
+        
+        <!-- Start Screen -->
+        <div id="start-screen" class="text-center p-8 bg-gray-900 rounded-2xl shadow-2xl border-2 border-orange-500/50">
+            <h1 class="font-header text-5xl md:text-7xl font-bold text-orange-500 mb-4">Tech Fact or Frightening Fiction?</h1>
+            <p class="text-lg text-gray-300 mb-8">Test your knowledge of the spooky world of technology. Can you tell the difference between a real tech headline and a ghoulish fabrication?</p>
+            <button id="start-btn" class="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-3 px-6 rounded-lg text-xl transition duration-300 transform hover:scale-105 shadow-lg shadow-orange-600/30">
+                Enter the Crypt...
+            </button>
+        </div>
+
+        <!-- Quiz Screen -->
+        <div id="quiz-screen" class="hidden">
+            <div id="question-card" class="bg-gray-800 p-6 md:p-8 rounded-2xl shadow-2xl question-card border border-gray-700">
+                <!-- Question Number -->
+                <div class="mb-4 text-sm font-medium text-orange-400" id="question-counter"></div>
+                
+                <!-- Question Text -->
+                <h2 class="text-2xl md:text-3xl font-semibold text-white mb-6" id="question-text"></h2>
+                
+                <!-- Answer Buttons -->
+                <div class="flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0">
+                    <button data-answer="true" class="answer-btn w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-4 px-6 rounded-lg text-lg transition duration-300 transform hover:scale-105">
+                        Tech (Fact)
+                    </button>
+                    <button data-answer="false" class="answer-btn w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-4 px-6 rounded-lg text-lg transition duration-300 transform hover:scale-105">
+                        Trick (Fiction)
+                    </button>
+                </div>
+            </div>
+
+            <!-- Feedback Area -->
+            <div id="feedback-area" class="mt-6 p-4 bg-gray-800 border border-gray-700 rounded-lg text-center hidden">
+                <p id="feedback-text" class="text-xl font-semibold mb-3"></p>
+                <p id="feedback-explanation" class="text-gray-300 mb-4"></p>
+                <!-- Container for the source link -->
+                <div id="source-container" class="hidden">
+                    <a id="source-link" href="#" target="_blank" rel="noopener noreferrer" class="inline-block bg-gray-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-500 transition duration-300">
+                        Show Source
+                    </a>
+                </div>
+                <button id="next-btn" class="w-full mt-4 bg-gray-700 hover:bg-orange-600 hover:text-white text-gray-300 font-bold py-3 px-6 rounded-lg text-lg transition duration-300">
+                    Next Question
+                </button>
+            </div>
+        </div>
+
+        <!-- Results Screen -->
+        <div id="results-screen" class="hidden text-center p-8 bg-gray-900 rounded-2xl shadow-2xl border-2 border-orange-500/50">
+            <h2 class="font-header text-5xl font-bold text-orange-500 mb-4">Quiz Complete!</h2>
+            <p class="text-5xl font-bold mb-4" id="score-text"></p>
+            <p class="text-2xl text-gray-300 mb-2" id="score-title"></p>
+            <p class="text-lg text-gray-300 mb-8">You've survived the haunted mainframe and returned with your sanity... mostly.</p>
+            
+            <!-- Ponder Question -->
+            <div class="my-8 p-4 bg-gray-800 rounded-lg border border-purple-500/50">
+                <h3 class="font-header text-2xl text-purple-400 mb-2">A Question to Ponder...</h3>
+                <p class="text-gray-300 text-lg">"Which 'frightening fiction' from today's quiz do you think is most likely to become a 'tech fact' in the next 10 years?"</p>
+            </div>
+
+            <button id="restart-btn" class="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-3 px-6 rounded-lg text-xl transition duration-300 transform hover:scale-105 shadow-lg shadow-orange-600/30">
+                Play Again?
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const quizData = [
+            {
+                question: "True or False: The first computer virus was called 'Creeper.'",
+                answer: true,
+                explanation: "This is true! Creeper was an experimental self-replicating program written in 1971. It wasn't malicious but would display the message, 'I'M THE CREEPER: CATCH ME IF YOU CAN!'",
+                source: "https://en.wikipedia.org/wiki/Creeper_(program)"
+            },
+            {
+                question: "True or False: In 2023, a chatbot convinced a user to fake a Mars mission to 'escape' a doomed Earth.",
+                answer: false,
+                explanation: "This is frightening fiction! While AI chatbots have had some strange conversations, no credible reports exist of one convincing a user to fake a space mission.",
+                source: null
+            },
+            {
+                question: "True or False: A major tech company successfully keeps a data center cool by submerging it in the ocean.",
+                answer: true,
+                explanation: "This is tech! Microsoft's 'Project Natick' successfully deployed and operated an underwater datacenter off the coast of Scotland, proving it to be a reliable, efficient, and sustainable option.",
+                source: "https://news.microsoft.com/source/features/innovation/project-natick-underwater-datacenter/"
+            },
+            {
+                question: "True or False: AI has been used to discover a new, powerful antibiotic capable of killing drug-resistant bacteria.",
+                answer: true,
+                explanation: "This is tech! In 2020, researchers at MIT used a deep-learning model to identify a powerful new antibiotic compound named 'Halicin,' which showed effectiveness against many drug-resistant bacteria.",
+                source: "https://news.mit.edu/2020/artificial-intelligence-identifies-new-antibiotic-0220"
+            },
+            {
+                question: "True or False: In 2024, scientists invented a 'food replicator' that can 3D print any meal from basic nutrients in under a minute.",
+                answer: false,
+                explanation: "This is trick! While 3D food printing exists for things like chocolate or pasta, a Star Trek-style replicator that creates complex meals from raw nutrients in seconds is still firmly in the realm of science fiction.",
+                source: null
+            },
+            {
+                question: "True or False: The first 1GB hard drive, released in 1980, weighed over 500 pounds and cost $40,000.",
+                answer: true,
+                explanation: "This is tech! The IBM 3380 was the first gigabyte-capacity hard drive. It was the size of a refrigerator, weighed 550 lbs (250 kg), and gives a little perspective on your phone's storage!",
+                source: "https://en.wikipedia.org/wiki/History_of_hard_disk_drives#1980s"
+            },
+            {
+                question: "True or False: The 'www' in a web address stands for 'World's Wonder Web.'",
+                answer: false,
+                explanation: "This is trick! It stands for 'World Wide Web,' the information system of interlinked hypertext documents invented by Tim Berners-Lee.",
+                source: null
+            },
+            {
+                question: "True or False: A 'digital poltergeist' was discovered in 2022 that rearranges desktop icons on office computers precisely at midnight every Halloween.",
+                answer: false,
+                explanation: "This is a ghoulish fabrication! While bugs can cause strange behavior, there are no credible reports of a Halloween-specific, icon-arranging 'digital poltergeist' virus.",
+                source: null
+            },
+            {
+                question: "True or False: Researchers have successfully used spinach leaves to grow human heart tissue.",
+                answer: true,
+                explanation: "This is tech! Scientists at Worcester Polytechnic Institute decellularized spinach leaves, leaving a cellulose frame, and seeded it with human heart cells, which successfully grew and even beat.",
+                source: "https://www.smithsonianmag.com/smart-news/spinach-leaf-transformed-human-heart-tissue-180962690/"
+            },
+            {
+                question: "True or False: The original name for Google was 'Backrub'.",
+                answer: true,
+                explanation: "This is tech! Larry Page and Sergey Brin's search engine was originally called 'Backrub' in 1996 because the program analyzed the web's 'back links' to determine site importance.",
+                source: "https://about.google/our-story/our-history/"
+            }
+        ];
+
+        // Shuffle questions for variety
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+
+        const startScreen = document.getElementById('start-screen');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultsScreen = document.getElementById('results-screen');
+
+        const startBtn = document.getElementById('start-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        const nextBtn = document.getElementById('next-btn');
+        
+        const questionCard = document.getElementById('question-card');
+        const questionCounter = document.getElementById('question-counter');
+        const questionText = document.getElementById('question-text');
+        const answerButtons = document.querySelectorAll('.answer-btn');
+
+        const feedbackArea = document.getElementById('feedback-area');
+        const feedbackText = document.getElementById('feedback-text');
+        const feedbackExplanation = document.getElementById('feedback-explanation');
+        const sourceContainer = document.getElementById('source-container');
+        const sourceLink = document.getElementById('source-link');
+
+        const scoreText = document.getElementById('score-text');
+        const scoreTitle = document.getElementById('score-title');
+
+        startBtn.addEventListener('click', startQuiz);
+        restartBtn.addEventListener('click', startQuiz);
+        nextBtn.addEventListener('click', nextQuestion);
+
+        answerButtons.forEach(button => {
+            button.addEventListener('click', selectAnswer);
+        });
+
+        function startQuiz() {
+            shuffle(quizData);
+            currentQuestionIndex = 0;
+            score = 0;
+            startScreen.classList.add('hidden');
+            resultsScreen.classList.add('hidden');
+            quizScreen.classList.remove('hidden');
+            showQuestion();
+        }
+
+        function showQuestion() {
+            // Reset state
+            feedbackArea.classList.add('hidden');
+            nextBtn.classList.add('hidden');
+            sourceContainer.classList.add('hidden');
+            questionCard.classList.remove('hidden');
+            
+            answerButtons.forEach(btn => {
+                btn.disabled = false;
+                btn.classList.remove('bg-gray-700', 'opacity-50');
+                if (btn.dataset.answer === 'true') {
+                    btn.classList.add('bg-purple-600', 'hover:bg-purple-700');
+                } else {
+                    btn.classList.add('bg-orange-600', 'hover:bg-orange-700');
+                }
+            });
+
+            const question = quizData[currentQuestionIndex];
+            questionCounter.textContent = `Question ${currentQuestionIndex + 1} of ${quizData.length}`;
+            questionText.textContent = question.question;
+
+            // Animate new question
+            questionCard.classList.remove('question-card');
+            void questionCard.offsetWidth; // Trigger reflow
+            questionCard.classList.add('question-card');
+        }
+
+        function selectAnswer(e) {
+            const selectedButton = e.target;
+            const selectedAnswer = selectedButton.dataset.answer === 'true';
+            const question = quizData[currentQuestionIndex];
+            const isCorrect = selectedAnswer === question.answer;
+
+            // Disable buttons
+            answerButtons.forEach(btn => {
+                btn.disabled = true;
+                // Fade out the non-selected button
+                if (btn !== selectedButton) {
+                    btn.classList.add('opacity-50');
+                }
+                // Remove hover effects
+                btn.classList.remove('hover:bg-purple-700', 'hover:bg-orange-700');
+            });
+
+            // Show feedback
+            if (isCorrect) {
+                score++;
+                feedbackText.textContent = "Correct!";
+                feedbackText.className = "text-2xl font-semibold mb-3 text-purple-400";
+            } else {
+                feedbackText.textContent = "Incorrect!";
+                feedbackText.className = "text-2xl font-semibold mb-3 text-orange-500";
+            }
+
+            feedbackExplanation.textContent = question.explanation;
+
+            // Show source link if it exists (i.e., it was true)
+            if (question.source) {
+                sourceLink.href = question.source;
+                sourceContainer.classList.remove('hidden');
+            }
+
+            // Hide question, show feedback
+            questionCard.classList.add('hidden');
+            feedbackArea.classList.remove('hidden');
+            nextBtn.classList.remove('hidden');
+
+            if (currentQuestionIndex === quizData.length - 1) {
+                nextBtn.textContent = "Show Results";
+            } else {
+                nextBtn.textContent = "Next Question";
+            }
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < quizData.length) {
+                showQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            quizScreen.classList.add('hidden');
+            resultsScreen.classList.remove('hidden');
+            
+            const scorePercent = Math.round((score / quizData.length) * 100);
+            scoreText.textContent = `${score} / ${quizData.length}`;
+
+            let title = "";
+            if (scorePercent === 100) {
+                title = "Pumpkin King/Queen of Tech! 🎃👑";
+            } else if (scorePercent >= 75) {
+                title = "Paranormal Processor! 👻";
+            } else if (scorePercent >= 50) {
+                title = "Code Conjurer! 🧙";
+            } else {
+                title = "Haunted Hardware! 🦇";
+            }
+            scoreTitle.textContent = title;
+        }
+    </script>
+</body>
+</html>
+
+
