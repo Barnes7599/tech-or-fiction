@@ -52,6 +52,24 @@
             </button>
         </div>
 
+        <!-- Loading Screen -->
+        <div id="loading-screen" class="hidden text-center p-8 bg-gray-900 rounded-2xl shadow-2xl border-2 border-orange-500/50">
+            <h2 class="font-header text-4xl text-orange-500 mb-4">Summoning Ghoulish Questions...</h2>
+            <div class="flex justify-center items-center">
+                <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
+            </div>
+            <p class="text-gray-400 mt-4">Please wait while we conjure a new quiz from the digital beyond...</p>
+        </div>
+
+        <!-- Error Screen -->
+        <div id="error-screen" class="hidden text-center p-8 bg-gray-900 rounded-2xl shadow-2xl border-2 border-red-500/50">
+            <h2 class="font-header text-4xl text-red-500 mb-4">Digital Poltergeist!</h2>
+            <p class="text-gray-300 mb-6" id="error-message">A technical error occurred while fetching the quiz questions. The spirits may be interfering with the connection.</p>
+            <button id="retry-btn" class="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-3 px-6 rounded-lg text-xl transition duration-300 transform hover:scale-105 shadow-lg shadow-orange-600/30">
+                Try Again...
+            </button>
+        </div>
+
         <!-- Quiz Screen -->
         <div id="quiz-screen" class="hidden">
             <div id="question-card" class="bg-gray-800 p-6 md:p-8 rounded-2xl shadow-2xl question-card border border-gray-700">
@@ -98,7 +116,7 @@
             <!-- Ponder Question -->
             <div class="my-8 p-4 bg-gray-800 rounded-lg border border-purple-500/50">
                 <h3 class="font-header text-2xl text-purple-400 mb-2">A Question to Ponder...</h3>
-                <p class="text-gray-300 text-lg">"Do you have a 'frightening fiction' you think is most likely to become a 'tech fact' in the next 10 years?"</p>
+                <p class="text-gray-300 text-lg">"Which 'frightening fiction' from today's quiz do you think is most likely to become a 'tech fact' in the next 10 years?"</p>
             </div>
 
             <button id="restart-btn" class="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-3 px-6 rounded-lg text-xl transition duration-300 transform hover:scale-105 shadow-lg shadow-orange-600/30">
@@ -108,85 +126,56 @@
     </div>
 
     <script>
-        const quizData = [
-            {
-                question: "True or False: The first computer virus was called 'Creeper.'",
-                answer: true,
-                explanation: "This is true! Creeper was an experimental self-replicating program written in 1971. It wasn't malicious but would display the message, 'I'M THE CREEPER: CATCH ME IF YOU CAN!'",
-                source: "https://en.wikipedia.org/wiki/Creeper_(program)"
-            },
-            {
-                question: "True or False: In 2023, a chatbot convinced a user to fake a Mars mission to 'escape' a doomed Earth.",
-                answer: false,
-                explanation: "This is frightening fiction! While AI chatbots have had some strange conversations, no credible reports exist of one convincing a user to fake a space mission.",
-                source: null
-            },
-            {
-                question: "True or False: A major tech company successfully keeps a data center cool by submerging it in the ocean.",
-                answer: true,
-                explanation: "This is tech! Microsoft's 'Project Natick' successfully deployed and operated an underwater datacenter off the coast of Scotland, proving it to be a reliable, efficient, and sustainable option.",
-                source: "https://news.microsoft.com/source/features/innovation/project-natick-underwater-datacenter/"
-            },
-            {
-                question: "True or False: AI has been used to discover a new, powerful antibiotic capable of killing drug-resistant bacteria.",
-                answer: true,
-                explanation: "This is tech! In 2020, researchers at MIT used a deep-learning model to identify a powerful new antibiotic compound named 'Halicin,' which showed effectiveness against many drug-resistant bacteria.",
-                source: "https://news.mit.edu/2020/artificial-intelligence-identifies-new-antibiotic-0220"
-            },
-            {
-                question: "True or False: In 2024, scientists invented a 'food replicator' that can 3D print any meal from basic nutrients in under a minute.",
-                answer: false,
-                explanation: "This is trick! While 3D food printing exists for things like chocolate or pasta, a Star Trek-style replicator that creates complex meals from raw nutrients in seconds is still firmly in the realm of science fiction.",
-                source: null
-            },
-            {
-                question: "True or False: The first 1GB hard drive, released in 1980, weighed over 500 pounds and cost $40,000.",
-                answer: true,
-                explanation: "This is tech! The IBM 3380 was the first gigabyte-capacity hard drive. It was the size of a refrigerator, weighed 550 lbs (250 kg), and gives a little perspective on your phone's storage!",
-                source: "https://en.wikipedia.org/wiki/History_of_hard_disk_drives#1980s"
-            },
-            {
-                question: "True or False: The 'www' in a web address stands for 'World's Wonder Web.'",
-                answer: false,
-                explanation: "This is trick! It stands for 'World Wide Web,' the information system of interlinked hypertext documents invented by Tim Berners-Lee.",
-                source: null
-            },
-            {
-                question: "True or False: A 'digital poltergeist' was discovered in 2022 that rearranges desktop icons on office computers precisely at midnight every Halloween.",
-                answer: false,
-                explanation: "This is a ghoulish fabrication! While bugs can cause strange behavior, there are no credible reports of a Halloween-specific, icon-arranging 'digital poltergeist' virus.",
-                source: null
-            },
-            {
-                question: "True or False: Researchers have successfully used spinach leaves to grow human heart tissue.",
-                answer: true,
-                explanation: "This is tech! Scientists at Worcester Polytechnic Institute decellularized spinach leaves, leaving a cellulose frame, and seeded it with human heart cells, which successfully grew and even beat.",
-                source: "https://www.wpi.edu/news/wpi-team-grows-heart-tissue-spinach-leaves"
-            },
-            {
-                question: "True or False: The original name for Google was 'Backrub'.",
-                answer: true,
-                explanation: "This is tech! Larry Page and Sergey Brin's search engine was originally called 'Backrub' in 1996 because the program analyzed the web's 'back links' to determine site importance.",
-                source: "https://about.google/company-info/our-story/"
-            }
-        ];
+        // --- Gemini API Configuration ---
 
-        // Shuffle questions for variety
-        function shuffle(array) {
-            for (let i = array.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]];
-            }
-        }
+        // The prompt to the AI, asking for 10 questions in a specific JSON format.
+        const QUIZ_PROMPT = `
+            You are a quiz master for a Halloween-themed tech trivia game called "Tech Fact or Frightening Fiction."
+            Your task is to generate 10 unique, challenging, and fun "True or False" quiz questions.
+            
+            Rules:
+            1.  Generate exactly 10 questions.
+            2.  Mix real, verifiable tech facts (Tech) with plausible-sounding but completely fake tech fiction (Trick).
+            3.  The tone should be spooky, fun, and Halloween-themed.
+            4.  For "Tech" (true) facts, you MUST provide a valid source URL.
+            5.  For "Trick" (false) fiction, the source MUST be null.
+            6.  Explanations should be concise (1-2 sentences) and explain why the answer is true or false.
+            
+            Provide the output ONLY in the requested JSON schema.
+        `;
 
+        // The JSON schema the AI must follow for its response.
+        const QUIZ_SCHEMA = {
+            type: "ARRAY",
+            items: {
+                type: "OBJECT",
+                properties: {
+                    "question": { "type": "STRING" },
+                    "answer": { "type": "BOOLEAN" },
+                    "explanation": { "type": "STRING" },
+                    "source": { 
+                        "type": ["STRING", "NULL"],
+                        "description": "The URL source if the fact is true, or null if it is fiction."
+                    }
+                },
+                required: ["question", "answer", "explanation", "source"]
+            }
+        };
+
+        // --- End API Configuration ---
+
+        let quizData = []; // Will be populated by the API
         let currentQuestionIndex = 0;
         let score = 0;
 
         const startScreen = document.getElementById('start-screen');
+        const loadingScreen = document.getElementById('loading-screen');
+        const errorScreen = document.getElementById('error-screen');
         const quizScreen = document.getElementById('quiz-screen');
         const resultsScreen = document.getElementById('results-screen');
 
         const startBtn = document.getElementById('start-btn');
+        const retryBtn = document.getElementById('retry-btn');
         const restartBtn = document.getElementById('restart-btn');
         const nextBtn = document.getElementById('next-btn');
         
@@ -203,22 +192,145 @@
 
         const scoreText = document.getElementById('score-text');
         const scoreTitle = document.getElementById('score-title');
+        const errorMessage = document.getElementById('error-message');
 
-        startBtn.addEventListener('click', startQuiz);
-        restartBtn.addEventListener('click', startQuiz);
+        startBtn.addEventListener('click', generateQuizQuestions);
+        retryBtn.addEventListener('click', generateQuizQuestions);
+        restartBtn.addEventListener('click', () => {
+            // Go back to start screen to generate new questions
+            resultsScreen.classList.add('hidden');
+            startScreen.classList.remove('hidden');
+        });
         nextBtn.addEventListener('click', nextQuestion);
 
         answerButtons.forEach(button => {
             button.addEventListener('click', selectAnswer);
         });
 
+        // --- API Call and Logic ---
+
+        /**
+         * Calls the Gemini API to generate a new set of quiz questions.
+         */
+        async function generateQuizQuestions() {
+            showScreen('loading');
+            
+            const apiKey = ""; // API key is handled by the environment
+            const apiUrl = `https://generativelangugage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+
+            const payload = {
+                contents: [{ parts: [{ text: QUIZ_PROMPT }] }],
+                generationConfig: {
+                    responseMimeType: "application/json",
+                    responseSchema: QUIZ_SCHEMA
+                }
+            };
+
+            try {
+                const apiResponse = await fetchWithBackoff(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!apiResponse.ok) {
+                    throw new Error(`API Error: ${apiResponse.status} ${apiResponse.statusText}`);
+                }
+
+                const result = await apiResponse.json();
+                
+                const jsonText = result.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (!jsonText) {
+                    throw new Error("Invalid response structure from API.");
+                }
+
+                quizData = JSON.parse(jsonText);
+                
+                if (!Array.isArray(quizData) || quizData.length === 0) {
+                     throw new Error("API returned empty or invalid question data.");
+                }
+
+                // We got the questions! Start the quiz.
+                startQuiz();
+
+            } catch (error) {
+                console.error("Failed to generate quiz questions:", error);
+                errorMessage.textContent = `A technical error occurred: ${error.message}. The spirits may be interfering with the connection.`;
+                showScreen('error');
+            }
+        }
+
+        /**
+         * Fetches data with exponential backoff for retries.
+         */
+        async function fetchWithBackoff(url, options, retries = 3, delay = 1000) {
+            try {
+                const response = await fetch(url, options);
+                if (!response.ok && retries > 0 && (response.status === 429 || response.status >= 500)) {
+                    // Retry on rate limiting or server errors
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    return fetchWithBackoff(url, options, retries - 1, delay * 2);
+                }
+                return response;
+            } catch (error) {
+                if (retries > 0) {
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    return fetchWithBackoff(url, options, retries - 1, delay * 2);
+                }
+                throw error;
+            }
+        }
+
+        /**
+         * Utility to show the correct screen
+         */
+        function showScreen(screenName) {
+            startScreen.classList.add('hidden');
+            loadingScreen.classList.add('hidden');
+            errorScreen.classList.add('hidden');
+            quizScreen.classList.add('hidden');
+            resultsScreen.classList.add('hidden');
+
+            switch (screenName) {
+                case 'start':
+                    startScreen.classList.remove('hidden');
+                    break;
+                case 'loading':
+                    loadingScreen.classList.remove('hidden');
+                    break;
+                case 'error':
+                    errorScreen.classList.remove('hidden');
+                    break;
+                case 'quiz':
+                    quizScreen.classList.remove('hidden');
+                    break;
+                case 'results':
+                    resultsScreen.classList.remove('hidden');
+                    break;
+            }
+        }
+
+
+        // --- Quiz Game Logic ---
+
+        /**
+         * Shuffles the quizData array.
+         */
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        /**
+         * Initializes and starts the quiz after questions are fetched.
+         */
         function startQuiz() {
             shuffle(quizData);
             currentQuestionIndex = 0;
             score = 0;
-            startScreen.classList.add('hidden');
-            resultsScreen.classList.add('hidden');
-            quizScreen.classList.remove('hidden');
+            showScreen('quiz');
             showQuestion();
         }
 
@@ -306,8 +418,7 @@
         }
 
         function showResults() {
-            quizScreen.classList.add('hidden');
-            resultsScreen.classList.remove('hidden');
+            showScreen('results');
             
             const scorePercent = Math.round((score / quizData.length) * 100);
             scoreText.textContent = `${score} / ${quizData.length}`;
@@ -327,5 +438,6 @@
     </script>
 </body>
 </html>
+
 
 
